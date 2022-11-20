@@ -1,4 +1,5 @@
 import { GetStaticProps } from 'next';
+import { ReactElement } from 'react';
 
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../services/prismic';
@@ -25,78 +26,60 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home() {
+export default function Home({ postsPagination }: HomeProps): JSX.Element {
+  const actualPagePosts = postsPagination.results;
+
   return (
     <div className={styles.content}>
-      <a>
-        <strong>Como utilizar Hooks</strong>
-        <p>Pensando em sincronização em vez de ciclos de vida.</p>
-        <div className={styles.metaData}>
-          <FiCalendar />
-          <time>15 Mar 2021</time>
-          <FiUser />
-          <span>Joseph Oliveira</span>
-        </div>
-      </a>
+      {actualPagePosts.map(post => {
+        return (
+          <a href={`/posts/${post.uid}`} key={post.uid}>
+            <strong>{post.data.title}</strong>
+            <p>{post.data.subtitle}</p>
+            <div className={styles.metaData}>
+              <FiCalendar />
+              <time>{post.first_publication_date}</time>
+              <FiUser />
+              <span>{post.data.author}</span>
+            </div>
+          </a>
+        );
+      })}
 
-      <a>
-        <strong>Como utilizar Hooks</strong>
-        <p>Pensando em sincronização em vez de ciclos de vida.</p>
-        <div className={styles.metaData}>
-          <FiCalendar />
-          <time>15 Mar 2021</time>
-          <FiUser />
-          <span>Joseph Oliveira</span>
-        </div>
-      </a>
-
-      <a>
-        <strong>Como utilizar Hooks</strong>
-        <p>Pensando em sincronização em vez de ciclos de vida.</p>
-        <div className={styles.metaData}>
-          <FiCalendar />
-          <time>15 Mar 2021</time>
-          <FiUser />
-          <span>Joseph Oliveira</span>
-        </div>
-      </a>
-
-      <a>
-        <strong>Como utilizar Hooks</strong>
-        <p>Pensando em sincronização em vez de ciclos de vida.</p>
-        <div className={styles.metaData}>
-          <FiCalendar />
-          <time>15 Mar 2021</time>
-          <FiUser />
-          <span>Joseph Oliveira</span>
-        </div>
-      </a>
-
-      <a>
-        <strong>Como utilizar Hooks</strong>
-        <p>Pensando em sincronização em vez de ciclos de vida.</p>
-        <div className={styles.metaData}>
-          <FiCalendar />
-          <time>15 Mar 2021</time>
-          <FiUser />
-          <span>Joseph Oliveira</span>
-        </div>
-      </a>
-
-      <button
-        type="button"
-        onClick={console.log('ok')}
-        className={styles.loadMore}
-      >
+      <button type="button" className={styles.loadMore}>
         Carregar mais posts
       </button>
     </div>
   );
 }
 
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient({});
-//   // const postsResponse = await prismic.getByType(TODO);
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient({});
+  const postsPagination = await prismic.getByType('posts', {
+    fetch: ['posts.title', 'posts.author', 'posts.subtitle'],
+    pageSize: 5,
+  });
 
-//   // TODO
-// };
+  const formattedResults = postsPagination.results.map(post => {
+    const formattedDate = new Date(
+      post.first_publication_date
+    ).toLocaleDateString('pt-BR', {
+      dateStyle: 'medium',
+    });
+    return {
+      ...post,
+      first_publication_date: formattedDate,
+    };
+  });
+
+  const formattedPostsPagination = {
+    ...postsPagination,
+    results: formattedResults,
+  };
+
+  return {
+    props: {
+      postsPagination: formattedPostsPagination,
+    },
+  };
+};
