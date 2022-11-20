@@ -44,7 +44,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
     <div className={styles.content}>
       {posts.map(post => {
         return (
-          <a href={`/posts/${post.uid}`} key={post.uid}>
+          <a href={`/post/${post.uid}`} key={post.uid}>
             <strong>{post.data.title}</strong>
             <p>{post.data.subtitle}</p>
             <div className={styles.metaData}>
