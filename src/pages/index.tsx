@@ -1,10 +1,11 @@
 import { GetStaticProps } from 'next';
-import { ReactElement } from 'react';
+import { useState } from 'react';
 
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
+import formatPrismicResults from '../Utils/formatPrismicResults';
 import styles from './home.module.scss';
 
 interface Post {
@@ -27,11 +28,21 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
-  const actualPagePosts = postsPagination.results;
+  const [posts, setPosts] = useState(postsPagination.results);
+  const [nextPageUrl, setNextPageUrl] = useState(postsPagination.next_page);
+
+  const handleLoadMore = async event => {
+    const nextPage = event.target.getAttribute('data-nextpage');
+    const responseData = await (await fetch(nextPage)).json();
+    const formattedResponseData = formatPrismicResults(responseData);
+    const updatedPosts = [...posts, ...formattedResponseData];
+    setPosts(updatedPosts);
+    setNextPageUrl(formattedResponseData.next_page);
+  };
 
   return (
     <div className={styles.content}>
-      {actualPagePosts.map(post => {
+      {posts.map(post => {
         return (
           <a href={`/posts/${post.uid}`} key={post.uid}>
             <strong>{post.data.title}</strong>
@@ -46,9 +57,18 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         );
       })}
 
-      <button type="button" className={styles.loadMore}>
-        Carregar mais posts
-      </button>
+      {nextPageUrl ? (
+        <button
+          type="button"
+          className={styles.loadMore}
+          onClick={e => handleLoadMore(e)}
+          data-nextpage={nextPageUrl}
+        >
+          Carregar mais posts
+        </button>
+      ) : (
+        ''
+      )}
     </div>
   );
 }
