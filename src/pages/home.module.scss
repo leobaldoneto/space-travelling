@@ -49,10 +49,15 @@
   }
 
   > :last-child {
+    text-align: left;
+
     font-weight: 600;
     font-size: 18px;
     margin-top: 64px;
 
     color: var(--highlight);
+    background: transparent;
+
+    border: 0;
   }
 }

@@ -83,9 +83,13 @@ export default function Home() {
         </div>
       </a>
 
-      <a onClick={console.log('ok')} className={styles.loadMore}>
+      <button
+        type="button"
+        onClick={console.log('ok')}
+        className={styles.loadMore}
+      >
         Carregar mais posts
-      </a>
+      </button>
     </div>
   );
 }
