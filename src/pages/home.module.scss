@@ -1,1 +1,58 @@
-// TODO
+.content {
+  margin: 65px auto;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+
+  > a {
+    & + a {
+      margin-top: 48px;
+    }
+
+    strong {
+      margin-bottom: 8px;
+
+      color: var(--heading);
+      font-weight: bold;
+      font-size: 28px;
+      line-height: 34px;
+    }
+
+    p {
+      font-weight: normal;
+      font-size: 18px;
+      line-height: 22px;
+
+      margin-bottom: 24px;
+    }
+
+    div {
+      display: flex;
+      align-items: center;
+
+      color: var(--info);
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 17px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+
+        margin-right: 8px;
+      }
+
+      svg:nth-child(3) {
+        margin-left: 24px;
+      }
+    }
+  }
+
+  > :last-child {
+    font-weight: 600;
+    font-size: 18px;
+    margin-top: 64px;
+
+    color: var(--highlight);
+  }
+}
