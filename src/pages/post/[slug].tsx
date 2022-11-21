@@ -4,6 +4,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 
 import { getPrismicClient } from '../../services/prismic';
+import { formatDateString } from '../../Utils/formatDateString';
 
 // import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -30,6 +31,21 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
+  const countWords = (string: string): number => {
+    return string.split(' ').filter(word => word !== '').length;
+  };
+
+  const wordsCount = post.data.content.reduce((acc, content) => {
+    const headingWordCount = countWords(content.heading);
+    const bodyWordCount = content.body.reduce((wordCount, { text }) => {
+      return wordCount + countWords(text);
+    }, 0);
+    const contentWordCount = headingWordCount + bodyWordCount;
+    return acc + contentWordCount;
+  }, 0);
+  const humanReadingSpeedInWordsPerMinute = 200;
+  const readTime = Math.ceil(wordsCount / humanReadingSpeedInWordsPerMinute);
+
   return (
     <>
       {post ? (
@@ -39,9 +55,9 @@ export default function Post({ post }: PostProps): JSX.Element {
             <h1>{post.data.title}</h1>
             <div className={styles.info}>
               <FiCalendar />
-              <time>{post.first_publication_date}</time>
+              <time>{formatDateString(post.first_publication_date)}</time>
               <FiUser /> <span>{post.data.author}</span>
-              <FiClock /> <span>10 min</span>
+              <FiClock /> <span>{readTime} min</span>
             </div>
             <article>
               {post.data.content.map(content => {
@@ -49,7 +65,7 @@ export default function Post({ post }: PostProps): JSX.Element {
                   <>
                     <strong>{content.heading}</strong>
                     <PrismicRichText
-                      field={[content.body as unknown as RTNode]}
+                      field={content.body as unknown as RTNode}
                     />
                   </>
                 );
@@ -65,11 +81,18 @@ export default function Post({ post }: PostProps): JSX.Element {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // const prismic = getPrismicClient({});
-  // const posts = await prismic.getByType('posts');
+  const prismic = getPrismicClient({});
+  const posts = await prismic.getAllByType('posts');
+  const paths = posts.map(post => {
+    return {
+      params: {
+        slug: post.uid,
+      },
+    };
+  });
 
   return {
-    paths: [],
+    paths,
     fallback: true,
   };
 };
@@ -77,7 +100,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params;
   const prismic = getPrismicClient({});
-  const post = await prismic.getByUID('posts', slug.toString());
+  const response = await prismic.getByUID('posts', slug.toString());
+  const post = {
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+    data: {
+      title: response.data.title,
+      subtitle: response.data.subtitle,
+      author: response.data.author,
+      banner: {
+        url: response.data.banner.url,
+      },
+      content: response.data.content,
+    },
+  };
 
   return {
     props: { post },
