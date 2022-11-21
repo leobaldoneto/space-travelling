@@ -1,13 +1,23 @@
-export default function formatPrismicResults ( prismicResults ) {
+interface Post {
+  uid?: string;
+  first_publication_date: string;
+  data: {
+    title: string;
+    subtitle: string;
+    author: string;
+  };
+}
+
+export default function formatPrismicResults ( prismicResults ): Post[] {
   return prismicResults.results.map(post => {
-    const formattedDate = new Date(
-      post.first_publication_date
-    ).toLocaleDateString('pt-BR', {
-      dateStyle: 'medium',
-    });
     return {
-      ...post,
-      first_publication_date: formattedDate,
+      uid: post.uid,
+      first_publication_date: post.first_publication_date,
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author
+      }
     };
   });
 }

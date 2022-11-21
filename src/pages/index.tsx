@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import Link from 'next/link';
 import { getPrismicClient } from '../services/prismic';
+import { formatDateString } from '../Utils/formatDateString';
 
-import commonStyles from '../styles/common.module.scss';
+// import commonStyles from '../styles/common.module.scss';
 import formatPrismicResults from '../Utils/formatPrismicResults';
 import styles from './home.module.scss';
 
@@ -38,7 +39,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
     const formattedResponseData = formatPrismicResults(responseData);
     const updatedPosts = [...posts, ...formattedResponseData];
     setPosts(updatedPosts);
-    setNextPageUrl(formattedResponseData.next_page);
+    setNextPageUrl(responseData.next_page);
   };
 
   return (
@@ -47,15 +48,15 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         return (
           <Link href={`/post/${post.uid}`} key={post.uid}>
             <a>
-            <strong>{post.data.title}</strong>
-            <p>{post.data.subtitle}</p>
-            <div className={styles.metaData}>
-              <FiCalendar />
+              <strong>{post.data.title}</strong>
+              <p>{post.data.subtitle}</p>
+              <div className={styles.metaData}>
+                <FiCalendar />
                 <time>{formatDateString(post.first_publication_date)}</time>
-              <FiUser />
-              <span>{post.data.author}</span>
-            </div>
-          </a>
+                <FiUser />
+                <span>{post.data.author}</span>
+              </div>
+            </a>
           </Link>
         );
       })}
@@ -78,15 +79,16 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient({});
-  const postsPagination = await prismic.getByType('posts', {
+  const response = await prismic.getByType('posts', {
     fetch: ['posts.title', 'posts.author', 'posts.subtitle'],
     pageSize: 5,
+    orderings: ['posts.first_publication_date'],
   });
 
-  const formattedResults = formatPrismicResults(postsPagination);
+  const formattedResults = formatPrismicResults(response);
 
   const formattedPostsPagination = {
-    ...postsPagination,
+    next_page: response.next_page,
     results: formattedResults,
   };
 
