@@ -1,1 +1,63 @@
-// TODO
+.content {
+  img {
+    width: 100%;
+    margin-bottom: 80px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  max-width: 700px;
+
+  h1 {
+    margin-bottom: 24px;
+    font-weight: bold;
+    font-size: 48px;
+    line-height: 58px;
+  }
+
+  div {
+    margin-bottom: 64px;
+    display: flex;
+    align-items: center;
+
+    color: var(--info);
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+
+      margin-right: 8px;
+    }
+
+    svg:not(:first-child) {
+      margin-left: 24px;
+    }
+  }
+
+  article {
+    text-align: justify;
+    line-height: 25px;
+    font-size: 18px;
+    font-weight: normal;
+
+    > strong {
+      display: block;
+      margin-bottom: 50px;
+
+      font-size: 36px;
+      font-weight: bold;
+      line-height: 40px;
+      color: var(--heading);
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+  }
+}
